@@ -29,7 +29,7 @@ const userSchema = mongoose.Schema({
             message: 'Password must be at least 6 character',
         }
     },
-    addresss: {
+    address: {
         trim: true,
         type: String,
         default: "",
