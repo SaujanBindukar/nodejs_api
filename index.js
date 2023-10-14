@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const authRouter = require('./routes/auth');
 
-const mongodbUrl = 'mongodb+srv://sauzanbindukar:saujan123@cluster0.p5qrvfp.mongodb.net/?retryWrites=true&w=majority';
+const mongodbUrl = require('./value');
 
 //init
 const PORT = 3000;
