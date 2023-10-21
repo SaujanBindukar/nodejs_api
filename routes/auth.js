@@ -4,7 +4,10 @@ const User = require('../models/user');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const auth = require('../middleware/auth');
+
 const authRouter = express.Router();
+
 
 authRouter.post('/api/signup', async (req, res) => {
 
@@ -65,15 +68,37 @@ authRouter.post('/api/signin', async (req, res) => {
         }
         //generating the token
         const token = jwt.sign({ _id: user._id }, "passwordKey");
-
         return res.status(200).json({ token, ...user._doc });
-
-
 
     } catch (error) {
         return res.status(500).json({ error: e.message })
 
     }
+});
+
+//if the token is changed in the memory of device by the hacker
+authRouter.post('/isValidToken', async (req, res) => {
+    try {
+        const token = req.header['Authorization']
+        if (!token) return res.json(false);
+        const verified = jwt.verify(token, 'passwordKey');
+        if (!verified) return res.json(false);
+        //what if random token is correct
+        const user = await User.findById(verified.id); //using id property of verified token
+        if (!user) return res.json(false);
+        res.json(true);
+    } catch (error) {
+        res.status(500).json({ err: e.message });
+
+    }
+});
+
+
+//get user data
+//auth is the middle ware whch checks if the token is valid or not
+authRouter.get('/api/users', auth, async (req, res) => {
+    const user = await User.findById(req.user);
+    res.status(200).json({ ...user._doc, token: req.token });
 });
 
 
