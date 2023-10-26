@@ -20,7 +20,7 @@ authRouter.post('/api/signup', async (req, res) => {
 
         //doesnot return bool but return object 
         if (existingUser) {
-            return res.status(400).json({ message: 'User with this email already exists' });
+            return res.status(400).json({ msg: 'User with this email already exists' });
         }
         //salt is random string 
         const hashPassword = await bcryptjs.hash(password, 8);
@@ -35,14 +35,17 @@ authRouter.post('/api/signup', async (req, res) => {
         });
 
         user = await user.save();
-        res.json(user);
+        //generating the token
+        const token = jwt.sign({ _id: user._id }, "passwordKey");
+        return res.status(200).json({ token });
+        // return res.status(200).json({ token, ...user._doc });
 
     } catch (e) {
         return res.status(500).json({ error: e.message })
     }
 
 
-    //String is object in JS
+    //Working  method
     //get data from client 
     //save to database
     //return response to client
@@ -68,7 +71,7 @@ authRouter.post('/api/signin', async (req, res) => {
         }
         //generating the token
         const token = jwt.sign({ _id: user._id }, "passwordKey");
-        return res.status(200).json({ token, ...user._doc });
+        return res.status(200).json({ token });
 
     } catch (error) {
         return res.status(500).json({ error: e.message })
@@ -100,8 +103,5 @@ authRouter.get('/api/users', auth, async (req, res) => {
     const user = await User.findById(req.user);
     res.status(200).json({ ...user._doc, token: req.token });
 });
-
-
-
 
 module.exports = authRouter;
